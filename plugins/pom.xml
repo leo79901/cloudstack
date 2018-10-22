@@ -197,6 +197,7 @@
       </activation>
       <modules>
         <module>api/vmware-sioc</module>
+        <module>api/vsphere-update</module>
       </modules>
     </profile>
     <profile>

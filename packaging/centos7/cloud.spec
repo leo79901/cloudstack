@@ -170,6 +170,12 @@ Group: System Environmnet/Libraries
 %description mysql-ha
 Apache CloudStack Balancing Strategy for MySQL
 
+%package vsphere-update
+Summary: Apache CloudStack VMware Datacenter Update API
+Group: System Environmnet/Libraries
+%description vsphere-update
+Apache CloudStack VMware Datacenter Update API
+
 %endif
 
 %prep
@@ -334,6 +340,11 @@ cp -r test/integration/* ${RPM_BUILD_ROOT}%{_datadir}/%{name}-integration-tests/
 if [ "x%{_ossnoss}" == "xnoredist" ] ; then
   mkdir -p ${RPM_BUILD_ROOT}%{_datadir}/%{name}-mysql-ha/lib
   cp -r plugins/database/mysql-ha/target/cloud-plugin-database-mysqlha-%{_maventag}.jar ${RPM_BUILD_ROOT}%{_datadir}/%{name}-mysql-ha/lib
+fi
+
+# VSphere Update Plugin
+if [ "x%{_ossnoss}" == "xnoredist" ] ; then
+  cp -r plugins/api/vsphere-update/target/cloud-plugin-api-vsphere-update-%{_maventag}.jar ${RPM_BUILD_ROOT}%{_datadir}/%{name}-management/lib
 fi
 
 #License files from whisker
@@ -578,6 +589,9 @@ pip install --upgrade /usr/share/cloudstack-marvin/Marvin-*.tar.gz
 %attr(0644,root,root) %{_datadir}/%{name}-mysql-ha/lib/*
 %{_defaultdocdir}/%{name}-mysql-ha-%{version}/LICENSE
 %{_defaultdocdir}/%{name}-mysql-ha-%{version}/NOTICE
+%files vsphere-update
+%defattr(0644,cloud,cloud,0755)
+%attr(0644,root,root) %{_datadir}/%{name}-management/lib/*vsphere-update*jar
 %endif
 
 %files baremetal-agent
