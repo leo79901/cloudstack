@@ -3755,6 +3755,7 @@ public class UserVmManagerImpl extends ManagerBase implements UserVmManager, Vir
         }
         return userVm;
     }
+
     private NetworkVO getNetworkToAddToNetworkList(VirtualMachineTemplate template, Account owner, HypervisorType hypervisor,
             List<HypervisorType> vpcSupportedHTypes, Long networkId) {
         NetworkVO network = _networkDao.findById(networkId);
