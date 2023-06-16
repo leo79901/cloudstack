@@ -8022,22 +8022,26 @@ public class UserVmManagerImpl extends ManagerBase implements UserVmManager, Vir
     private void deleteVolumesFromVm(UserVmVO vm, List<VolumeVO> volumes, boolean expunge) {
 
         for (VolumeVO volume : volumes) {
-            // Create new context and inject correct event resource type, id and details,
-            // otherwise VOLUME.DESTROY event will be associated with VirtualMachine and contain VM id and other information.
-            CallContext volumeContext = CallContext.register(CallContext.current(), ApiCommandResourceType.Volume);
-            volumeContext.setEventDetails("Volume Type: " + volume.getVolumeType() + " Volume Id: " + this._uuidMgr.getUuid(Volume.class, volume.getId()) + " Vm Id: " + vm.getUuid());
-            volumeContext.setEventResourceType(ApiCommandResourceType.Volume);
-            volumeContext.setEventResourceId(volume.getId());
-            try {
-                Volume result = _volumeService.destroyVolume(volume.getId(), CallContext.current().getCallingAccount(), expunge, false);
+            destroyVolumeInContext(vm, expunge, volume);
+        }
+    }
 
-                if (result == null) {
-                    s_logger.error("DestroyVM remove volume - failed to delete volume " + volume.getId() + " from instance " + volume.getInstanceId());
-                }
-            } finally {
-                // Remove volumeContext and pop vmContext back
-                CallContext.unregister();
+    private void destroyVolumeInContext(UserVmVO vm, boolean expunge, VolumeVO volume) {
+        // Create new context and inject correct event resource type, id and details,
+        // otherwise VOLUME.DESTROY event will be associated with VirtualMachine and contain VM id and other information.
+        CallContext volumeContext = CallContext.register(CallContext.current(), ApiCommandResourceType.Volume);
+        volumeContext.setEventDetails("Volume Type: " + volume.getVolumeType() + " Volume Id: " + this._uuidMgr.getUuid(Volume.class, volume.getId()) + " Vm Id: " + vm.getUuid());
+        volumeContext.setEventResourceType(ApiCommandResourceType.Volume);
+        volumeContext.setEventResourceId(volume.getId());
+        try {
+            Volume result = _volumeService.destroyVolume(volume.getId(), CallContext.current().getCallingAccount(), expunge, false);
+
+            if (result == null) {
+                s_logger.error("DestroyVM remove volume - failed to delete volume " + volume.getId() + " from instance " + volume.getInstanceId());
             }
+        } finally {
+            // Remove volumeContext and pop vmContext back
+            CallContext.unregister();
         }
     }
 
