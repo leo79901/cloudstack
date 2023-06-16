@@ -8032,7 +8032,7 @@ public class UserVmManagerImpl extends ManagerBase implements UserVmManager, Vir
                 Volume result = _volumeService.destroyVolume(volume.getId(), CallContext.current().getCallingAccount(), expunge, false);
 
                 if (result == null) {
-                    s_logger.error("DestroyVM remove volume - failed to delete volume " + volume.getInstanceId() + " from instance " + volume.getId());
+                    s_logger.error("DestroyVM remove volume - failed to delete volume " + volume.getId() + " from instance " + volume.getInstanceId());
                 }
             } finally {
                 // Remove volumeContext and pop vmContext back

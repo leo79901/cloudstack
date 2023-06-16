@@ -1190,19 +1190,7 @@ public class VolumeOrchestrator extends ManagerBase implements VolumeOrchestrati
                         // Destroy volume if not already destroyed
                         boolean volumeAlreadyDestroyed = (vol.getState() == Volume.State.Destroy || vol.getState() == Volume.State.Expunged || vol.getState() == Volume.State.Expunging);
                         if (!volumeAlreadyDestroyed) {
-                            // Create new context and inject correct event resource type, id and details,
-                            // otherwise VOLUME.DESTROY event will be associated with VirtualMachine and contain VM id and other information.
-                            CallContext volumeContext = CallContext.register(CallContext.current(), ApiCommandResourceType.Volume);
-                            volumeContext.setEventDetails("Volume Type: " + vol.getVolumeType() + " Volume Id: " +  vol.getUuid() + " Vm Id: " + _uuidMgr.getUuid(VirtualMachine.class, vol.getInstanceId()));
-                            volumeContext.setEventResourceType(ApiCommandResourceType.Volume);
-                            volumeContext.setEventResourceId(vol.getId());
-                            try {
-                                _volumeApiService.destroyVolume(vol.getId());
-                            } finally {
-                                // Remove volumeContext and pop vmContext back
-                                CallContext.unregister();
-                            }
-
+                            destroyVolumeInContext(vol);
                         } else {
                             s_logger.debug("Skipping destroy for the volume " + vol + " as its in state " + vol.getState().toString());
                         }
@@ -1231,6 +1219,21 @@ public class VolumeOrchestrator extends ManagerBase implements VolumeOrchestrati
             } catch (ExecutionException e) {
                 s_logger.debug("failed expunge volume" + expunge.getId(), e);
             }
+        }
+    }
+
+    private void destroyVolumeInContext(VolumeVO volume) {
+        // Create new context and inject correct event resource type, id and details,
+        // otherwise VOLUME.DESTROY event will be associated with VirtualMachine and contain VM id and other information.
+        CallContext volumeContext = CallContext.register(CallContext.current(), ApiCommandResourceType.Volume);
+        volumeContext.setEventDetails("Volume Type: " + volume.getVolumeType() + " Volume Id: " +  volume.getUuid() + " Vm Id: " + _uuidMgr.getUuid(VirtualMachine.class, volume.getInstanceId()));
+        volumeContext.setEventResourceType(ApiCommandResourceType.Volume);
+        volumeContext.setEventResourceId(volume.getId());
+        try {
+            _volumeApiService.destroyVolume(volume.getId());
+        } finally {
+            // Remove volumeContext and pop vmContext back
+            CallContext.unregister();
         }
     }
 
