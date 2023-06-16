@@ -750,7 +750,7 @@ public class DeployVMCmd extends BaseAsyncCreateCustomIdCmd implements SecurityG
             if (result == null) {
                 s_logger.warn("UserVm " + getEntityUuid() + " does not exist in DB");
             } else {
-                s_logger.info("loaded UserVm " + getEntityUuid() + " from DB");
+                s_logger.debug("loaded UserVm " + getEntityUuid() + " from DB");
             }
         }
 
