@@ -439,7 +439,7 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
                 String convCurrentResourceReservation = String.valueOf(currentResourceReservation);
                 String convNumResources = String.valueOf(numResources);
 
-                if (type == ResourceType.secondary_storage || type == ResourceType.primary_storage){
+                if (type == ResourceType.secondary_storage || type == ResourceType.primary_storage) {
                     convDomainResourceLimit = toHumanReadableSize(domainResourceLimit);
                     convCurrentDomainResourceCount = toHumanReadableSize(currentDomainResourceCount);
                     convCurrentResourceReservation = toHumanReadableSize(currentResourceReservation);
@@ -448,7 +448,7 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
 
                 String messageSuffix = String.format(
                         " domain resource limits of Type '%s' for Domain Id = %s is exceeded: Domain Resource Limit = %s, " +
-                        "Current Domain Resource Amount = %s, Current Resource Reservation = %s, Requested Resource Amount = %s.",
+                                "Current Domain Resource Amount = %s, Current Resource Reservation = %s, Requested Resource Amount = %s.",
                         type, domainId, convDomainResourceLimit,
                         convCurrentDomainResourceCount, convCurrentResourceReservation, convNumResources
                 );
@@ -480,7 +480,7 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
         String convertedCurrentResourceReservation = String.valueOf(currentResourceReservation);
         String convertedNumResources = String.valueOf(numResources);
 
-        if (type == ResourceType.secondary_storage || type == ResourceType.primary_storage){
+        if (type == ResourceType.secondary_storage || type == ResourceType.primary_storage) {
             convertedAccountResourceLimit = toHumanReadableSize(accountResourceLimit);
             convertedCurrentResourceCount = toHumanReadableSize(currentResourceCount);
             convertedCurrentResourceReservation = toHumanReadableSize(currentResourceReservation);
@@ -489,7 +489,7 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
 
         String messageSuffix = String.format(
                 " amount of resources of Type = '%s' for %s in Domain Id = %s is exceeded: " +
-                "Account Resource Limit = %s, Current Account Resource Amount = %s, Current Account Resource Reservation = %s, Requested Resource Amount = %s.",
+                        "Account Resource Limit = %s, Current Account Resource Amount = %s, Current Account Resource Reservation = %s, Requested Resource Amount = %s.",
                 type, (project == null ? "Account Name = " + account.getAccountName() : "Project Name = " + project.getName()), account.getDomainId(),
                 convertedAccountResourceLimit, convertedCurrentResourceCount, convertedCurrentResourceReservation, convertedNumResources
         );
@@ -525,7 +525,7 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
         Long resourceLimit = null;
         resourceLimit = domainResourceLimitMap.get(resourceType);
         if (resourceLimit != null && (resourceType == ResourceType.primary_storage || resourceType == ResourceType.secondary_storage)) {
-            if (! Long.valueOf(Resource.RESOURCE_UNLIMITED).equals(resourceLimit)) {
+            if (!Long.valueOf(Resource.RESOURCE_UNLIMITED).equals(resourceLimit)) {
                 resourceLimit = resourceLimit * ResourceType.bytesToGiB;
             }
         } else {
@@ -637,7 +637,7 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
 
         if (domainId != null) {
             sc.setParameters("domainId", domainId);
-            sc.setParameters("accountId", (Object[])null);
+            sc.setParameters("accountId", (Object[]) null);
         }
 
         if (resourceType != null) {
@@ -850,7 +850,7 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
     protected boolean updateResourceCountForAccount(final long accountId, final ResourceType type, final boolean increment, final long delta) {
         if (s_logger.isDebugEnabled()) {
             String convertedDelta = String.valueOf(delta);
-            if (type == ResourceType.secondary_storage || type == ResourceType.primary_storage){
+            if (type == ResourceType.secondary_storage || type == ResourceType.primary_storage) {
                 convertedDelta = toHumanReadableSize(delta);
             }
             s_logger.debug("Updating resource Type = " + type + " count for Account = " + accountId + " Operation = " + (increment ? "increasing" : "decreasing") + " Amount = " + convertedDelta);
@@ -881,7 +881,7 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
      * and accounts of the sub-domains also. so just loop through immediate children of root domain
      *
      * @param domainId the domain level to start at
-     * @param type the resource type to do the recalculation for
+     * @param type     the resource type to do the recalculation for
      * @return the resulting new resource count
      */
     @DB
@@ -1001,11 +1001,11 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
         SearchCriteria<UserVmJoinVO> sc1 = userVmSearch.create();
         sc1.setParameters("accountId", accountId);
         if (VirtualMachineManager.ResourceCountRunningVMsonly.value())
-            sc1.setParameters("state", new Object[] {State.Destroyed, State.Error, State.Expunging, State.Stopped});
+            sc1.setParameters("state", new Object[]{State.Destroyed, State.Error, State.Expunging, State.Stopped});
         else
-            sc1.setParameters("state", new Object[] {State.Destroyed, State.Error, State.Expunging});
+            sc1.setParameters("state", new Object[]{State.Destroyed, State.Error, State.Expunging});
         sc1.setParameters("displayVm", 1);
-        List<UserVmJoinVO> userVms = _userVmJoinDao.search(sc1,null);
+        List<UserVmJoinVO> userVms = _userVmJoinDao.search(sc1, null);
         for (UserVmJoinVO vm : userVms) {
             cputotal += Long.valueOf(vm.getCpu());
         }
@@ -1025,11 +1025,11 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
         SearchCriteria<UserVmJoinVO> sc1 = userVmSearch.create();
         sc1.setParameters("accountId", accountId);
         if (VirtualMachineManager.ResourceCountRunningVMsonly.value())
-            sc1.setParameters("state", new Object[] {State.Destroyed, State.Error, State.Expunging, State.Stopped});
+            sc1.setParameters("state", new Object[]{State.Destroyed, State.Error, State.Expunging, State.Stopped});
         else
-            sc1.setParameters("state", new Object[] {State.Destroyed, State.Error, State.Expunging});
+            sc1.setParameters("state", new Object[]{State.Destroyed, State.Error, State.Expunging});
         sc1.setParameters("displayVm", 1);
-        List<UserVmJoinVO> userVms = _userVmJoinDao.search(sc1,null);
+        List<UserVmJoinVO> userVms = _userVmJoinDao.search(sc1, null);
         for (UserVmJoinVO vm : userVms) {
             ramtotal += Long.valueOf(vm.getRamSize());
         }
@@ -1087,7 +1087,7 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
 
         // 1. If its null assume displayResource = 1
         // 2. If its not null then send true if displayResource = 1
-        return ! Boolean.FALSE.equals(displayResource);
+        return !Boolean.FALSE.equals(displayResource);
     }
 
     @Override
@@ -1132,7 +1132,7 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
 
     @Override
     public ResourceReservation getReservation(final Account account, final Boolean displayResource, final Resource.ResourceType type, final Long delta) throws ResourceAllocationException {
-        if (! Boolean.FALSE.equals(displayResource)) {
+        if (!Boolean.FALSE.equals(displayResource)) {
             return new CheckedReservation(account, type, delta, reservationDao, resourceLimitService);
         }
         throw new CloudRuntimeException("no reservation needed for resources that display as false");
@@ -1145,7 +1145,7 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
 
     @Override
     public ConfigKey<?>[] getConfigKeys() {
-        return new ConfigKey<?>[] {ResourceCountCheckInterval};
+        return new ConfigKey<?>[]{ResourceCountCheckInterval};
     }
 
     protected class ResourceCountCheckTask extends ManagedContextRunnable {
@@ -1156,8 +1156,24 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
         @Override
         protected void runInContext() {
             s_logger.info("Started resource counters recalculation periodic task.");
-            List<DomainVO> domains = _domainDao.findImmediateChildrenForParent(Domain.ROOT_DOMAIN);
-            List<AccountVO> accounts = _accountDao.findActiveAccountsForDomain(Domain.ROOT_DOMAIN);
+            List<DomainVO> domains;
+            List<AccountVO> accounts;
+            // try/catch task, otherwise it won't be rescheduled in case of exception
+            try {
+                domains = _domainDao.findImmediateChildrenForParent(Domain.ROOT_DOMAIN);
+            } catch (Exception e) {
+                s_logger.warn("Resource counters recalculation periodic task failed, unable to fetch immediate children for the domain " + Domain.ROOT_DOMAIN, e);
+                // initialize domains as empty list to do best effort recalculation
+                domains = new ArrayList<>();
+            }
+            // try/catch task, otherwise it won't be rescheduled in case of exception
+            try {
+                accounts = _accountDao.findActiveAccountsForDomain(Domain.ROOT_DOMAIN);
+            } catch (Exception e) {
+                s_logger.warn("Resource counters recalculation periodic task failed, unable to fetch active accounts for domain " + Domain.ROOT_DOMAIN, e);
+                // initialize accounts as empty list to do best effort recalculation
+                accounts = new ArrayList<>();
+            }
 
             for (ResourceType type : ResourceType.values()) {
                 if (type.supportsOwner(ResourceOwnerType.Domain)) {
@@ -1173,6 +1189,21 @@ public class ResourceLimitManagerImpl extends ManagerBase implements ResourceLim
                         recalculateAccountResourceCount(account.getId(), type);
                     }
                 }
+            }
+        }
+
+        private void recalculateDomainResourceCount(long domainId, ResourceType type) {
+            try {
+                ResourceLimitManagerImpl.this.recalculateDomainResourceCount(domainId, type);
+            } catch (Exception e) {
+                s_logger.warn("Resource counters recalculation periodic task failed for the domain " + domainId + " and the resource type " + type + " .", e);
+            }
+        }
+        private void recalculateAccountResourceCount(long accountId, ResourceType type) {
+            try {
+                ResourceLimitManagerImpl.this.recalculateAccountResourceCount(accountId, type);
+            } catch (Exception e) {
+                s_logger.warn("Resource counters recalculation periodic task failed for the account " + accountId + " and the resource type " + type + " .", e);
             }
         }
     }
