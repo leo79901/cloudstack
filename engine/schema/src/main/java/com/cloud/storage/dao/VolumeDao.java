@@ -138,4 +138,6 @@ public interface VolumeDao extends GenericDao<VolumeVO, Long>, StateDao<Volume.S
      *  Updates the disk offering for the given volume.
      */
     void updateDiskOffering(long volumeId, long diskOfferingId);
+
+    void updateAndRemoveVolume(VolumeVO volume);
 }
