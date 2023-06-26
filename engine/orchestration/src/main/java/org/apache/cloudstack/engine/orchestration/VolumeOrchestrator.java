@@ -1952,7 +1952,7 @@ public class VolumeOrchestrator extends ManagerBase implements VolumeOrchestrati
                 _resourceLimitMgr.decrementResourceCount(volume.getAccountId(), ResourceType.volume, volume.isDisplay());
                 _resourceLimitMgr.decrementResourceCount(volume.getAccountId(), ResourceType.primary_storage, volume.isDisplay(), new Long(volume.getSize()));
             } else {
-                _volumeApiService.destroyVolume(volume.getId());
+                destroyVolumeInContext(volume);
             }
             // FIXME - All this is boiler plate code and should be done as part of state transition. This shouldn't be part of orchestrator.
             // publish usage event for the volume
