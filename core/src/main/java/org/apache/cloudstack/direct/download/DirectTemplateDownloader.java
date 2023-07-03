@@ -17,9 +17,11 @@
 // under the License.
 //
 
-package com.cloud.agent.direct.download;
+package org.apache.cloudstack.direct.download;
 
 import com.cloud.utils.Pair;
+
+import java.util.List;
 
 public interface DirectTemplateDownloader {
 
@@ -30,8 +32,30 @@ public interface DirectTemplateDownloader {
     Pair<Boolean, String> downloadTemplate();
 
     /**
-     * Perform checksum validation of previously downloadeed template
+     * Perform checksum validation of previously downloaded template
      * @return true if successful, false if not
      */
     boolean validateChecksum();
+
+    /**
+     * Validate if the URL is reachable and returns HTTP.OK status code
+     * @return true if the URL is reachable, false if not
+     */
+    boolean checkUrl(String url);
+
+    /**
+     * Obtain the remote file size (and virtual size in case format is qcow2)
+     */
+    Long getRemoteFileSize(String url, String format);
+
+    /**
+     * Get list of urls within metalink content ordered by ascending priority
+     * (for those which priority tag is not defined, highest priority value is assumed)
+     */
+    List<String> getMetalinkUrls(String metalinkUrl);
+
+    /**
+     * Get the list of checksums within a metalink content
+     */
+    List<String> getMetalinkChecksums(String metalinkUrl);
 }

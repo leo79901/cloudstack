@@ -38,14 +38,11 @@ import java.util.UUID;
 
 import javax.naming.ConfigurationException;
 
+import org.apache.cloudstack.direct.download.DirectDownloadHelper;
 import com.cloud.storage.ScopeType;
 import com.cloud.storage.Volume;
 import org.apache.cloudstack.agent.directdownload.DirectDownloadAnswer;
 import org.apache.cloudstack.agent.directdownload.DirectDownloadCommand;
-import org.apache.cloudstack.agent.directdownload.HttpDirectDownloadCommand;
-import org.apache.cloudstack.agent.directdownload.HttpsDirectDownloadCommand;
-import org.apache.cloudstack.agent.directdownload.MetalinkDirectDownloadCommand;
-import org.apache.cloudstack.agent.directdownload.NfsDirectDownloadCommand;
 import org.apache.cloudstack.storage.command.AttachAnswer;
 import org.apache.cloudstack.storage.command.AttachCommand;
 import org.apache.cloudstack.storage.command.CheckDataStoreStoragePolicyComplainceCommand;
@@ -100,11 +97,7 @@ import com.cloud.agent.api.to.DataTO;
 import com.cloud.agent.api.to.DiskTO;
 import com.cloud.agent.api.to.NfsTO;
 import com.cloud.agent.api.to.S3TO;
-import com.cloud.agent.direct.download.DirectTemplateDownloader;
-import com.cloud.agent.direct.download.HttpDirectTemplateDownloader;
-import com.cloud.agent.direct.download.HttpsDirectTemplateDownloader;
-import com.cloud.agent.direct.download.MetalinkDirectTemplateDownloader;
-import com.cloud.agent.direct.download.NfsDirectTemplateDownloader;
+import org.apache.cloudstack.direct.download.DirectTemplateDownloader;
 import com.cloud.exception.InternalErrorException;
 import com.cloud.exception.InvalidParameterValueException;
 import com.cloud.hypervisor.Hypervisor;
@@ -1980,28 +1973,6 @@ public class KVMStorageProcessor implements StorageProcessor {
         return new Answer(cmd, false, "not implememented yet");
     }
 
-    /**
-     * Get direct template downloader from direct download command and destination pool
-     */
-    private DirectTemplateDownloader getDirectTemplateDownloaderFromCommand(DirectDownloadCommand cmd,
-                                                                            KVMStoragePool destPool,
-                                                                            String temporaryDownloadPath) {
-        if (cmd instanceof HttpDirectDownloadCommand) {
-            return new HttpDirectTemplateDownloader(cmd.getUrl(), cmd.getTemplateId(), destPool.getLocalPath(), cmd.getChecksum(), cmd.getHeaders(),
-                    cmd.getConnectTimeout(), cmd.getSoTimeout(), temporaryDownloadPath);
-        } else if (cmd instanceof HttpsDirectDownloadCommand) {
-            return new HttpsDirectTemplateDownloader(cmd.getUrl(), cmd.getTemplateId(), destPool.getLocalPath(), cmd.getChecksum(), cmd.getHeaders(),
-                    cmd.getConnectTimeout(), cmd.getSoTimeout(), cmd.getConnectionRequestTimeout(), temporaryDownloadPath);
-        } else if (cmd instanceof NfsDirectDownloadCommand) {
-            return new NfsDirectTemplateDownloader(cmd.getUrl(), destPool.getLocalPath(), cmd.getTemplateId(), cmd.getChecksum(), temporaryDownloadPath);
-        } else if (cmd instanceof MetalinkDirectDownloadCommand) {
-            return new MetalinkDirectTemplateDownloader(cmd.getUrl(), destPool.getLocalPath(), cmd.getTemplateId(), cmd.getChecksum(), cmd.getHeaders(),
-                    cmd.getConnectTimeout(), cmd.getSoTimeout(), temporaryDownloadPath);
-        } else {
-            throw new IllegalArgumentException("Unsupported protocol, please provide HTTP(S), NFS or a metalink");
-        }
-    }
-
     @Override
     public Answer handleDownloadTemplateToPrimaryStorage(DirectDownloadCommand cmd) {
         final PrimaryDataStoreTO pool = cmd.getDestPool();
@@ -2033,7 +2004,8 @@ public class KVMStorageProcessor implements StorageProcessor {
             }
 
             destPool = storagePoolMgr.getStoragePool(pool.getPoolType(), pool.getUuid());
-            downloader = getDirectTemplateDownloaderFromCommand(cmd, destPool, temporaryDownloadPath);
+
+            downloader = DirectDownloadHelper.getDirectTemplateDownloaderFromCommand(cmd, destPool.getLocalPath(), temporaryDownloadPath);
             s_logger.debug("Trying to download template");
             Pair<Boolean, String> result = downloader.downloadTemplate();
             if (!result.first()) {
