@@ -504,27 +504,27 @@ public class VirtualMachineManagerImpl extends ManagerBase implements VirtualMac
                         volumeMgr.allocateTemplatedVolumes(Type.ROOT, rootVolumeName, rootDiskOfferingInfo.getDiskOffering(), rootDiskSizeFinal,
                                 rootDiskOfferingInfo.getMinIops(), rootDiskOfferingInfo.getMaxIops(), template, vmFinal, owner);
                     }
+
+                    if (dataDiskOfferings != null) {
+                        for (final DiskOfferingInfo dataDiskOfferingInfo : dataDiskOfferings) {
+                            volumeMgr.allocateRawVolume(Type.DATADISK, "DATA-" + vmFinal.getId(), dataDiskOfferingInfo.getDiskOffering(), dataDiskOfferingInfo.getSize(),
+                                    dataDiskOfferingInfo.getMinIops(), dataDiskOfferingInfo.getMaxIops(), vmFinal, template, owner, null);
+                        }
+                    }
+                    if (datadiskTemplateToDiskOfferingMap != null && !datadiskTemplateToDiskOfferingMap.isEmpty()) {
+                        int diskNumber = 1;
+                        for (Entry<Long, DiskOffering> dataDiskTemplateToDiskOfferingMap : datadiskTemplateToDiskOfferingMap.entrySet()) {
+                            DiskOffering diskOffering = dataDiskTemplateToDiskOfferingMap.getValue();
+                            long diskOfferingSize = diskOffering.getDiskSize() / (1024 * 1024 * 1024);
+                            VMTemplateVO dataDiskTemplate = _templateDao.findById(dataDiskTemplateToDiskOfferingMap.getKey());
+                            volumeMgr.allocateRawVolume(Type.DATADISK, "DATA-" + vmFinal.getId() + "-" + String.valueOf(diskNumber), diskOffering, diskOfferingSize, null, null,
+                                    vmFinal, dataDiskTemplate, owner, Long.valueOf(diskNumber));
+                            diskNumber++;
+                        }
+                    }
                 } finally {
                     // Remove volumeContext and pop vmContext back
                     CallContext.unregister();
-                }
-
-                if (dataDiskOfferings != null) {
-                    for (final DiskOfferingInfo dataDiskOfferingInfo : dataDiskOfferings) {
-                        volumeMgr.allocateRawVolume(Type.DATADISK, "DATA-" + vmFinal.getId(), dataDiskOfferingInfo.getDiskOffering(), dataDiskOfferingInfo.getSize(),
-                                dataDiskOfferingInfo.getMinIops(), dataDiskOfferingInfo.getMaxIops(), vmFinal, template, owner, null);
-                    }
-                }
-                if (datadiskTemplateToDiskOfferingMap != null && !datadiskTemplateToDiskOfferingMap.isEmpty()) {
-                    int diskNumber = 1;
-                    for (Entry<Long, DiskOffering> dataDiskTemplateToDiskOfferingMap : datadiskTemplateToDiskOfferingMap.entrySet()) {
-                        DiskOffering diskOffering = dataDiskTemplateToDiskOfferingMap.getValue();
-                        long diskOfferingSize = diskOffering.getDiskSize() / (1024 * 1024 * 1024);
-                        VMTemplateVO dataDiskTemplate = _templateDao.findById(dataDiskTemplateToDiskOfferingMap.getKey());
-                        volumeMgr.allocateRawVolume(Type.DATADISK, "DATA-" + vmFinal.getId() + "-" + String.valueOf(diskNumber), diskOffering, diskOfferingSize, null, null,
-                                vmFinal, dataDiskTemplate, owner, Long.valueOf(diskNumber));
-                        diskNumber++;
-                    }
                 }
             }
         });

@@ -705,7 +705,10 @@ public class DeployVMCmd extends BaseAsyncCreateCustomIdCmd implements SecurityG
 
     @Override
     public String getEventDescription() {
-        return "starting Vm. Vm Id: " + getEntityUuid();
+        if(getStartVm()) {
+            return "starting Vm. Vm Id: " + getEntityUuid();
+        }
+        return "deploying Vm. Vm Id: " + getEntityUuid();
     }
 
     @Override
@@ -717,9 +720,9 @@ public class DeployVMCmd extends BaseAsyncCreateCustomIdCmd implements SecurityG
     public void execute() {
         UserVm result;
 
+        CallContext.current().setEventDetails("Vm Id: " + getEntityUuid());
         if (getStartVm()) {
             try {
-                CallContext.current().setEventDetails("Vm Id: " + getEntityUuid());
                 result = _userVmService.startVirtualMachine(this);
             } catch (ResourceUnavailableException ex) {
                 s_logger.warn("Exception: ", ex);
@@ -742,7 +745,8 @@ public class DeployVMCmd extends BaseAsyncCreateCustomIdCmd implements SecurityG
                 throw new ServerApiException(ApiErrorCode.INSUFFICIENT_CAPACITY_ERROR, message.toString());
             }
         } else {
-            result = _userVmService.getUserVm(getEntityId());
+            s_logger.info("VM " + getEntityUuid() + " already created, load UserVm from DB");
+            result = _userVmService.finalizeCreateVirtualMachine(getEntityId());
         }
 
         if (result != null) {
