@@ -55,8 +55,6 @@ public interface UserVmManager extends UserVmService {
     ConfigKey<Boolean> DisplayVMOVFProperties = new ConfigKey<Boolean>("Advanced", Boolean.class, "vm.display.ovf.properties", "false",
             "Set display of VMs OVF properties as part of VM details", true);
 
-    static final int MAX_USER_DATA_LENGTH_BYTES = 2048;
-
     public  static  final String CKS_NODE = "cksnode";
 
     /**

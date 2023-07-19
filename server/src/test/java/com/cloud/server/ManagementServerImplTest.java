@@ -22,19 +22,9 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-import com.cloud.storage.VMTemplateVO;
-import com.cloud.storage.dao.VMTemplateDao;
-import com.cloud.user.AccountManager;
-import com.cloud.user.User;
-import com.cloud.user.UserData;
-import com.cloud.user.UserDataVO;
-import com.cloud.user.dao.UserDataDao;
-import com.cloud.utils.Pair;
-import com.cloud.utils.db.Filter;
-import com.cloud.utils.db.SearchBuilder;
-import com.cloud.utils.exception.CloudRuntimeException;
-import com.cloud.vm.UserVmVO;
-import com.cloud.vm.dao.UserVmDao;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.cloudstack.annotation.dao.AnnotationDao;
 import org.apache.cloudstack.api.BaseCmd;
 import org.apache.cloudstack.api.command.user.ssh.RegisterSSHKeyPairCmd;
@@ -43,6 +33,7 @@ import org.apache.cloudstack.api.command.user.userdata.ListUserDataCmd;
 import org.apache.cloudstack.api.command.user.userdata.RegisterUserDataCmd;
 import org.apache.cloudstack.context.CallContext;
 import org.apache.cloudstack.framework.config.ConfigKey;
+import org.apache.cloudstack.userdata.UserDataManager;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -60,14 +51,24 @@ import org.powermock.reflect.Whitebox;
 import com.cloud.exception.InvalidParameterValueException;
 import com.cloud.network.IpAddressManagerImpl;
 import com.cloud.network.dao.IPAddressVO;
+import com.cloud.storage.VMTemplateVO;
+import com.cloud.storage.dao.VMTemplateDao;
 import com.cloud.user.Account;
+import com.cloud.user.AccountManager;
 import com.cloud.user.SSHKeyPair;
 import com.cloud.user.SSHKeyPairVO;
+import com.cloud.user.User;
+import com.cloud.user.UserData;
+import com.cloud.user.UserDataVO;
 import com.cloud.user.dao.SSHKeyPairDao;
+import com.cloud.user.dao.UserDataDao;
+import com.cloud.utils.Pair;
+import com.cloud.utils.db.Filter;
+import com.cloud.utils.db.SearchBuilder;
 import com.cloud.utils.db.SearchCriteria;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.cloud.utils.exception.CloudRuntimeException;
+import com.cloud.vm.UserVmVO;
+import com.cloud.vm.dao.UserVmDao;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(CallContext.class)
@@ -109,6 +110,9 @@ public class ManagementServerImplTest {
     @Mock
     UserVmDao _userVmDao;
 
+    @Mock
+    UserDataManager userDataManager;
+
     @Spy
     ManagementServerImpl spy = new ManagementServerImpl();
 
@@ -125,6 +129,7 @@ public class ManagementServerImplTest {
         spy.templateDao = _templateDao;
         spy._userVmDao = _userVmDao;
         spy.annotationDao = annotationDao;
+        spy.userDataManager = userDataManager;
     }
 
     @After
@@ -193,13 +198,15 @@ public class ManagementServerImplTest {
         when(callContextMock.getCallingAccount()).thenReturn(account);
         when(_accountMgr.finalizeOwner(nullable(Account.class), nullable(String.class), nullable(Long.class), nullable(Long.class))).thenReturn(account);
 
+        String testUserData = "testUserdata";
         RegisterUserDataCmd cmd = Mockito.mock(RegisterUserDataCmd.class);
         when(cmd.getUserData()).thenReturn("testUserdata");
         when(cmd.getName()).thenReturn("testName");
         when(cmd.getHttpMethod()).thenReturn(BaseCmd.HTTPMethod.GET);
 
         when(_userDataDao.findByName(account.getAccountId(), account.getDomainId(), "testName")).thenReturn(null);
-        when(_userDataDao.findByUserData(account.getAccountId(), account.getDomainId(), "testUserdata")).thenReturn(null);
+        when(_userDataDao.findByUserData(account.getAccountId(), account.getDomainId(), testUserData)).thenReturn(null);
+        when(userDataManager.validateUserData(testUserData, BaseCmd.HTTPMethod.GET)).thenReturn(testUserData);
 
         UserData userData = spy.registerUserData(cmd);
         Assert.assertEquals("testName", userData.getName());

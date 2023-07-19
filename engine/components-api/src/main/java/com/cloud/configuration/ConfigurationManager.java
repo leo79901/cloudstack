@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.cloudstack.framework.config.ConfigKey;
+
 import com.cloud.dc.ClusterVO;
 import com.cloud.dc.DataCenter;
 import com.cloud.dc.DataCenter.NetworkType;
@@ -49,6 +51,11 @@ import com.cloud.user.Account;
  *
  */
 public interface ConfigurationManager {
+
+    static final String VM_USERDATA_MAX_LENGTH_STRING = "vm.userdata.max.length";
+    static final ConfigKey<Integer> VM_USERDATA_MAX_LENGTH = new ConfigKey<>("Advanced", Integer.class, VM_USERDATA_MAX_LENGTH_STRING, "32768",
+            "Max length of vm userdata after base64 decoding. Default is 32768 and maximum is 1048576", true);
+
     /**
      * @param offering
      * @return
