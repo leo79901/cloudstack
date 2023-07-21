@@ -18,16 +18,18 @@
 //
 package com.cloud.resourcelimit;
 
+import org.apache.cloudstack.context.CallContext;
+import org.apache.cloudstack.reservation.ReservationVO;
+import org.apache.cloudstack.reservation.dao.ReservationDao;
+import org.apache.cloudstack.user.ResourceReservation;
+import org.apache.log4j.Logger;
+
 import com.cloud.configuration.Resource.ResourceType;
 import com.cloud.exception.ResourceAllocationException;
 import com.cloud.user.Account;
 import com.cloud.user.ResourceLimitService;
 import com.cloud.utils.db.GlobalLock;
-import org.apache.cloudstack.user.ResourceReservation;
 import com.cloud.utils.exception.CloudRuntimeException;
-import org.apache.cloudstack.reservation.ReservationVO;
-import org.apache.cloudstack.reservation.dao.ReservationDao;
-import org.apache.log4j.Logger;
 
 
 public class CheckedReservation  implements AutoCloseable, ResourceReservation {
@@ -39,6 +41,10 @@ public class CheckedReservation  implements AutoCloseable, ResourceReservation {
     private final ResourceType resourceType;
     private Long amount;
     private ResourceReservation reservation;
+
+    private String getContextParameterKey() {
+        return String.format("%s-%s", ResourceReservation.class.getSimpleName(), resourceType.getName());
+    }
 
     /**
      * - check if adding a reservation is allowed
@@ -69,6 +75,7 @@ public class CheckedReservation  implements AutoCloseable, ResourceReservation {
                     resourceLimitService.checkResourceLimit(account,resourceType,amount);
                     ReservationVO reservationVO = new ReservationVO(account.getAccountId(), account.getDomainId(), resourceType, amount);
                     this.reservation = reservationDao.persist(reservationVO);
+                    CallContext.current().putContextParameter(getContextParameterKey(), reservationVO.getId());
                 } catch (NullPointerException npe) {
                     throw new CloudRuntimeException("not enough means to check limits", npe);
                 } finally {
@@ -86,7 +93,8 @@ public class CheckedReservation  implements AutoCloseable, ResourceReservation {
 
     @Override
     public void close() throws Exception {
-        if (this.reservation != null){
+        if (this.reservation != null) {
+            CallContext.current().removeContextParameter(getContextParameterKey());
             reservationDao.remove(reservation.getId());
             reservation = null;
         }
