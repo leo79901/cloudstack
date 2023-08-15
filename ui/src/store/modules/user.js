@@ -56,7 +56,8 @@ const user = {
     darkMode: false,
     themeSetting: {},
     defaultListViewPageSize: 20,
-    countNotify: 0
+    countNotify: 0,
+    customHypervisorName: 'Custom'
   },
 
   mutations: {
@@ -125,6 +126,9 @@ const user = {
     },
     SET_COUNT_NOTIFY (state, number) {
       state.countNotify = number
+    },
+    SET_CUSTOM_HYPERVISOR_NAME (state, name) {
+      state.customHypervisorName = name
     }
   },
 
@@ -266,6 +270,15 @@ const user = {
           commit('SET_CLOUDIAN', cloudian)
         }).catch(ignored => {
         })
+
+        api('listConfigurations', { name: 'hypervisor.custom.display.name' }).then(json => {
+          if (json.listconfigurationsresponse.configuration !== null) {
+            const config = json.listconfigurationsresponse.configuration[0]
+            commit('SET_CUSTOM_HYPERVISOR_NAME', config.value)
+          }
+        }).catch(error => {
+          reject(error)
+        })
       })
     },
 
@@ -352,6 +365,15 @@ const user = {
         }).catch(error => {
           reject(error)
         })
+
+        api('listConfigurations', { name: 'hypervisor.custom.display.name' }).then(json => {
+          if (json.listconfigurationsresponse.configuration !== null) {
+            const config = json.listconfigurationsresponse.configuration[0]
+            commit('SET_CUSTOM_HYPERVISOR_NAME', config.value)
+          }
+        }).catch(error => {
+          reject(error)
+        })
       })
     },
     UpdateConfiguration ({ commit }) {
@@ -372,6 +394,9 @@ const user = {
     },
     SetThemeSetting ({ commit }, setting) {
       commit('SET_THEME_SETTING', setting)
+    },
+    SetCustomHypervisorName ({ commit }, name) {
+      commit('SET_CUSTOM_HYPERVISOR_NAME', name)
     }
   }
 }

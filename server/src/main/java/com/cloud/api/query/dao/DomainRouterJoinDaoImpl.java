@@ -112,7 +112,7 @@ public class DomainRouterJoinDaoImpl extends GenericDaoBase<DomainRouterJoinVO, 
                 routerResponse.setHostId(router.getHostUuid());
                 routerResponse.setHostName(router.getHostName());
                 routerResponse.setHostControlState(ControlState.getControlState(router.getHostStatus(), router.getHostResourceState()).toString());
-                routerResponse.setHypervisor(router.getHypervisorType().toString());
+                routerResponse.setHypervisor(router.getHypervisorType().getHypervisorDisplayName());
             }
             routerResponse.setPodId(router.getPodUuid());
             HostPodVO pod = ApiDBUtils.findPodById(router.getPodId());

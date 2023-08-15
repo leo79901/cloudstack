@@ -37,6 +37,7 @@ import javax.inject.Inject;
 import javax.naming.ConfigurationException;
 
 import com.cloud.alert.AlertManager;
+import com.cloud.hypervisor.HypervisorGuru;
 import com.cloud.storage.Volume;
 import com.cloud.storage.VolumeVO;
 import com.cloud.storage.dao.VolumeDao;
@@ -650,7 +651,9 @@ public class ResourceManagerImpl extends ManagerBase implements ResourceManager,
             }
         }
 
-        return discoverHostsFull(dcId, podId, clusterId, clusterName, url, username, password, cmd.getHypervisor(), hostTags, cmd.getFullUrlParams(), false);
+        String hypervisorType = cmd.getHypervisor().equalsIgnoreCase(HypervisorGuru.HypervisorCustomDisplayName.value()) ?
+                "Custom" : cmd.getHypervisor();
+        return discoverHostsFull(dcId, podId, clusterId, clusterName, url, username, password, hypervisorType, hostTags, cmd.getFullUrlParams(), false);
     }
 
     @Override

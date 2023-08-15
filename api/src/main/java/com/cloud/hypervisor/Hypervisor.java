@@ -20,7 +20,7 @@ import com.cloud.storage.Storage.ImageFormat;
 
 public class Hypervisor {
 
-    public static enum HypervisorType {
+    public enum HypervisorType {
         None, //for storage hosts
         XenServer,
         KVM,
@@ -33,7 +33,7 @@ public class Hypervisor {
         Ovm,
         Ovm3,
         LXC,
-
+        Custom,
         Any; /*If you don't care about the hypervisor type*/
 
         public static HypervisorType getType(String hypervisor) {
@@ -64,9 +64,22 @@ public class Hypervisor {
                 return HypervisorType.Any;
             } else if (hypervisor.equalsIgnoreCase("Ovm3")) {
                 return HypervisorType.Ovm3;
+            } else if (hypervisor.equalsIgnoreCase("Custom") ||
+                    hypervisor.equalsIgnoreCase(HypervisorGuru.HypervisorCustomDisplayName.value())) {
+                return HypervisorType.Custom;
             } else {
                 return HypervisorType.None;
             }
+        }
+
+        /**
+         * Returns the display name of a hypervisor type in case the custom hypervisor is used,
+         * using the 'hypervisor.custom.display.name' setting. Otherwise, returns hypervisor name
+         */
+        public String getHypervisorDisplayName() {
+            return !Hypervisor.HypervisorType.Custom.equals(this) ?
+                    this.toString() :
+                    HypervisorGuru.HypervisorCustomDisplayName.value();
         }
 
         /**

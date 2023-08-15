@@ -1255,6 +1255,9 @@ public class ApiDBUtils {
                   // If this check is not passed, the hypervisor type will remain OVM.
                   type = HypervisorType.KVM;
                   break;
+                } else if (pool.getHypervisor() == HypervisorType.Custom) {
+                    type = HypervisorType.Custom;
+                    break;
                 }
             }
         }
@@ -1777,7 +1780,7 @@ public class ApiDBUtils {
             if (vm.getLastHostId() != null) {
                 HostVO lastHost = ApiDBUtils.findHostById(vm.getLastHostId());
                 if (lastHost != null) {
-                    response.setHypervisor(lastHost.getHypervisorType().toString());
+                    response.setHypervisor(lastHost.getHypervisorType().getHypervisorDisplayName());
                 }
             }
         }

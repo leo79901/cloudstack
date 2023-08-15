@@ -42,6 +42,17 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Inject;
 import javax.naming.ConfigurationException;
 
+import com.cloud.agent.api.Answer;
+import com.cloud.agent.api.proxy.AllowConsoleAccessCommand;
+import com.cloud.exception.AgentUnavailableException;
+import com.cloud.storage.VMTemplateVO;
+import com.cloud.storage.dao.VMTemplateDao;
+import com.cloud.user.UserData;
+import com.cloud.user.UserDataVO;
+import com.cloud.user.dao.UserDataDao;
+import com.cloud.utils.db.UUIDManager;
+import com.cloud.vm.dao.DomainRouterDao;
+import com.cloud.vm.dao.NicDao;
 import org.apache.cloudstack.acl.ControlledEntity;
 import org.apache.cloudstack.affinity.AffinityGroupProcessor;
 import org.apache.cloudstack.affinity.dao.AffinityGroupVMMapDao;
@@ -589,10 +600,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.cloud.agent.AgentManager;
-import com.cloud.agent.api.Answer;
 import com.cloud.agent.api.GetVncPortAnswer;
 import com.cloud.agent.api.GetVncPortCommand;
-import com.cloud.agent.api.proxy.AllowConsoleAccessCommand;
 import com.cloud.agent.manager.allocator.HostAllocator;
 import com.cloud.alert.Alert;
 import com.cloud.alert.AlertManager;
@@ -638,7 +647,6 @@ import com.cloud.event.ActionEventUtils;
 import com.cloud.event.EventTypes;
 import com.cloud.event.EventVO;
 import com.cloud.event.dao.EventDao;
-import com.cloud.exception.AgentUnavailableException;
 import com.cloud.exception.ConcurrentOperationException;
 import com.cloud.exception.InsufficientAddressCapacityException;
 import com.cloud.exception.InvalidParameterValueException;
@@ -701,7 +709,6 @@ import com.cloud.storage.Storage;
 import com.cloud.storage.StorageManager;
 import com.cloud.storage.StoragePool;
 import com.cloud.storage.StoragePoolStatus;
-import com.cloud.storage.VMTemplateVO;
 import com.cloud.storage.Volume;
 import com.cloud.storage.VolumeApiServiceImpl;
 import com.cloud.storage.VolumeVO;
@@ -709,7 +716,6 @@ import com.cloud.storage.dao.DiskOfferingDao;
 import com.cloud.storage.dao.GuestOSCategoryDao;
 import com.cloud.storage.dao.GuestOSDao;
 import com.cloud.storage.dao.GuestOSHypervisorDao;
-import com.cloud.storage.dao.VMTemplateDao;
 import com.cloud.storage.dao.VolumeDao;
 import com.cloud.storage.secondary.SecondaryStorageVmManager;
 import com.cloud.tags.ResourceTagVO;
@@ -721,13 +727,10 @@ import com.cloud.user.AccountService;
 import com.cloud.user.SSHKeyPair;
 import com.cloud.user.SSHKeyPairVO;
 import com.cloud.user.User;
-import com.cloud.user.UserData;
-import com.cloud.user.UserDataVO;
 import com.cloud.user.UserVO;
 import com.cloud.user.dao.AccountDao;
 import com.cloud.user.dao.SSHKeyPairDao;
 import com.cloud.user.dao.UserDao;
-import com.cloud.user.dao.UserDataDao;
 import com.cloud.utils.NumbersUtil;
 import com.cloud.utils.Pair;
 import com.cloud.utils.PasswordGenerator;
@@ -746,7 +749,6 @@ import com.cloud.utils.db.SearchCriteria;
 import com.cloud.utils.db.Transaction;
 import com.cloud.utils.db.TransactionCallbackNoReturn;
 import com.cloud.utils.db.TransactionStatus;
-import com.cloud.utils.db.UUIDManager;
 import com.cloud.utils.exception.CloudRuntimeException;
 import com.cloud.utils.net.MacAddress;
 import com.cloud.utils.net.NetUtils;
@@ -765,9 +767,7 @@ import com.cloud.vm.VirtualMachineManager;
 import com.cloud.vm.VirtualMachineProfile;
 import com.cloud.vm.VirtualMachineProfileImpl;
 import com.cloud.vm.dao.ConsoleProxyDao;
-import com.cloud.vm.dao.DomainRouterDao;
 import com.cloud.vm.dao.InstanceGroupDao;
-import com.cloud.vm.dao.NicDao;
 import com.cloud.vm.dao.SecondaryStorageVmDao;
 import com.cloud.vm.dao.UserVmDao;
 import com.cloud.vm.dao.UserVmDetailsDao;
@@ -1202,7 +1202,9 @@ public class ManagementServerImpl extends ManagerBase implements ManagementServe
         }
 
         if (hypervisorType != null) {
-            sc.setParameters("hypervisorType", hypervisorType);
+            String hypervisorStr = (String) hypervisorType;
+            String hypervisorSearch = HypervisorType.getType(hypervisorStr).toString();
+            sc.setParameters("hypervisorType", hypervisorSearch);
         }
 
         if (clusterType != null) {
@@ -4152,7 +4154,7 @@ public class ManagementServerImpl extends ManagerBase implements ManagementServe
             } else {
                 final List<ClusterVO> clustersForZone = _clusterDao.listByZoneId(zoneId);
                 for (final ClusterVO cluster : clustersForZone) {
-                    result.add(cluster.getHypervisorType().toString());
+                    result.add(cluster.getHypervisorType().getHypervisorDisplayName());
                 }
             }
 
