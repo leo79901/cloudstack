@@ -84,24 +84,18 @@ public final class KVMHAProvider extends HAAbstractHostProvider implements HAPro
 
     @Override
     public boolean fence(Host r) throws HAFenceException {
+
         try {
-            // host exists and is managed OOB
-            if (r != null && outOfBandManagementService.isOutOfBandManagementEnabled(r)) {
-                // check host status
-                if (Host.Status.DOWN.equals(r.getStatus())) {
-                    LOG.info("Host " + r.getName() + " is already down. Returning success.");
-                    return true;
-                } else {
-                    final OutOfBandManagementResponse resp = outOfBandManagementService.executePowerOperation(r, PowerOperation.OFF, null);
-                    return resp.getSuccess();
-                }
+            if (outOfBandManagementService.isOutOfBandManagementEnabled(r)){
+                final OutOfBandManagementResponse resp = outOfBandManagementService.executePowerOperation(r, PowerOperation.OFF, null);
+                return resp.getSuccess();
             } else {
-                LOG.warn("OOBM fence operation failed for this host " + r.getName());
+                logger.warn("OOBM fence operation failed for this host " + r.getName());
                 return false;
             }
-        } catch (Exception e) {
-            LOG.warn("OOBM service is not configured or enabled for this host " + r.getName() + " error is " + e.getMessage());
-            throw new HAFenceException("OBM service is not configured or enabled for this host " + r.getName(), e);
+        } catch (Exception e){
+            logger.warn("OOBM service is not configured or enabled for this host " + r.getName() + " error is " + e.getMessage());
+            throw new HAFenceException("OBM service is not configured or enabled for this host " + r.getName() , e);
         }
     }
 
